@@ -16,10 +16,8 @@ We created a lifestyle score based on smoking, alcohol intake, and physical acti
 TBD
 
 ## Setup
-
--- SETUP INSTRUCTIONS
--- 1. Create a new database named healthcare
--- 2. Run this to create the patient table
+1. Create a new database named healthcare
+2. 2. Run this to create the patient table
 
 CREATE TABLE patient (
   patient_id INT,
@@ -38,7 +36,7 @@ CREATE TABLE patient (
   diabetes INT,
   stroke INT
 );
--- 4. Import the healthcare dataset csv into the patient table
+4. Import the healthcare dataset csv into the patient table
 https://www.kaggle.com/datasets/rafi003/healthcare-disease-prediction-dataset
 
 ## Team Roles
