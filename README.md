@@ -19,7 +19,23 @@ TBD
 1. Create a new database named healthcare
 2. Run this to create the patient table
 
-CREATE TABLE patient ( patient_id INT, age INT, gender TEXT, bmi FLOAT, blood_pressure_systolic INT, blood_pressure_diastolic INT, cholesterol INT, glucose_level INT, smoking INT, alcohol_intake INT, physical_activity INT, family_history INT, heart_disease INT, diabetes INT, stroke INT );
+CREATE TABLE patient ( 
+patient_id INT, 
+age INT, 
+gender TEXT, 
+bmi FLOAT, 
+blood_pressure_systolic INT, 
+blood_pressure_diastolic INT, 
+cholesterol INT, 
+glucose_level INT, 
+smoking INT, 
+alcohol_intake INT, 
+physical_activity INT, 
+family_history INT, 
+heart_disease INT, 
+diabetes INT, 
+stroke INT 
+);
 
 3. Import the healthcare dataset csv into the patient table
    
