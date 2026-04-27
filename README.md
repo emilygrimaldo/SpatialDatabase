@@ -17,7 +17,7 @@ TBD
 
 ## Setup
 1. Create a new database named healthcare
-2. 2. Run this to create the patient table
+2. Run this to create the patient table
 
 CREATE TABLE patient (
   patient_id INT,
