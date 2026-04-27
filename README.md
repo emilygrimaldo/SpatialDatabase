@@ -36,7 +36,9 @@ CREATE TABLE patient (
   diabetes INT,
   stroke INT
 );
+
 4. Import the healthcare dataset csv into the patient table
+   
 https://www.kaggle.com/datasets/rafi003/healthcare-disease-prediction-dataset
 
 ## Team Roles
