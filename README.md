@@ -1,7 +1,5 @@
 ## Healthcare Spatial Database Project
 
-https://www.kaggle.com/datasets/rafi003/healthcare-disease-prediction-dataset
-
 ## Overview
 
 This project explores how age and lifestyle factors influence health outcomes using a PostgreSQL database.
@@ -17,8 +15,34 @@ We created a lifestyle score based on smoking, alcohol intake, and physical acti
 ## Results
 TBD
 
+## Setup
+
+-- SETUP INSTRUCTIONS
+-- 1. Create a new database named healthcare
+-- 2. Run this to create the patient table
+
+CREATE TABLE patient (
+  patient_id INT,
+  age INT,
+  gender TEXT,
+  bmi FLOAT,
+  blood_pressure_systolic INT,
+  blood_pressure_diastolic INT,
+  cholesterol INT,
+  glucose_level INT,
+  smoking INT,
+  alcohol_intake INT,
+  physical_activity INT,
+  family_history INT,
+  heart_disease INT,
+  diabetes INT,
+  stroke INT
+);
+-- 4. Import the healthcare dataset csv into the patient table
+https://www.kaggle.com/datasets/rafi003/healthcare-disease-prediction-dataset
+
 ## Team Roles
 1. Database and SQL/ Risk Heatmap
 2. Gender + Behavior Heatmap 
 3. Clustering
-4. Disease Comparison
+4. Co-occurrence Map
