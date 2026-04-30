@@ -1,0 +1,455 @@
+:root {
+  color-scheme: light;
+  font-family: Aptos, "Segoe UI", "Helvetica Neue", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(148, 163, 255, 0.28), transparent 30%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.22), transparent 28%),
+    linear-gradient(180deg, #eff5ff 0%, #eef2ff 45%, #f6f0ff 100%);
+  color: #1e293b;
+  --bg-panel: rgba(255, 255, 255, 0.78);
+  --bg-soft: rgba(239, 244, 255, 0.88);
+  --border-soft: rgba(123, 147, 255, 0.18);
+  --text-main: #1e293b;
+  --text-muted: #5b6484;
+  --accent: #5b6cff;
+  --accent-strong: #4455dd;
+  --lavender: #8b7cf6;
+  --shadow-lg: 0 24px 70px rgba(76, 92, 162, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(148, 163, 255, 0.28), transparent 30%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.22), transparent 28%),
+    linear-gradient(180deg, #eff5ff 0%, #eef2ff 45%, #f6f0ff 100%);
+}
+
+button,
+select {
+  font: inherit;
+}
+
+.appShell {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  gap: 26px;
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.card {
+  background: var(--bg-panel);
+  backdrop-filter: blur(14px);
+  border-radius: 28px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.sidebar {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.panelHeading h1 {
+  margin: 0;
+  font-family: "Segoe UI Variable Display", Aptos Display, Aptos, sans-serif;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  color: #16213d;
+}
+
+.subtitle {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.content {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.sectionLabel {
+  color: var(--accent-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.chartHeader h2 {
+  margin: 0;
+  font-family: "Segoe UI Variable Display", Aptos Display, Aptos, sans-serif;
+  color: #1b2750;
+}
+
+.chartSubtitle {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.panelSection {
+  display: grid;
+  gap: 18px;
+}
+
+.controlSurface,
+.presetSurface {
+  padding: 20px 22px;
+  border-radius: 24px;
+  background: rgba(248, 250, 255, 0.88);
+  border: 1px solid rgba(122, 144, 230, 0.14);
+}
+
+.controlLabel {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: #263252;
+}
+
+.controlPrompt,
+.fieldHint {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  font-size: 0.94rem;
+}
+
+.selectField,
+.segmentControl {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  background: rgba(245, 247, 255, 0.95);
+  color: var(--text-main);
+  min-height: 50px;
+  padding: 0 16px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.segmentControl {
+  display: flex;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.segmentControl button {
+  border-radius: 16px;
+  border: 1px solid rgba(115, 128, 191, 0.18);
+  background: rgba(246, 247, 255, 0.96);
+  color: #52607d;
+  padding: 11px 14px;
+  cursor: pointer;
+  flex: 1;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease,
+    color 160ms ease, box-shadow 160ms ease;
+}
+
+.segmentControl button.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--lavender) 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 12px 28px rgba(91, 108, 255, 0.26);
+}
+
+.controlRow {
+  display: grid;
+  gap: 16px;
+}
+
+.controlSurfaceHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.inlineControlGrid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.1fr) repeat(2, minmax(180px, 1fr));
+  gap: 18px;
+  align-items: end;
+}
+
+.filterSection {
+  display: grid;
+  gap: 14px;
+}
+
+.checkboxRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.checkboxCard {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(236, 241, 255, 0.98));
+  border: 1px solid rgba(111, 128, 222, 0.16);
+  cursor: pointer;
+}
+
+.checkboxCard input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.checkboxCard span {
+  display: block;
+  color: #1f2a4b;
+  font-weight: 700;
+}
+
+.checkboxCard small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.controlGroupHeading {
+  padding-top: 4px;
+}
+
+.presetSection {
+  display: grid;
+  gap: 14px;
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.presetButton {
+  border: 1px solid rgba(111, 128, 222, 0.16);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(236, 241, 255, 0.98));
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.presetButton span {
+  color: #1f2a4b;
+  font-weight: 700;
+}
+
+.presetButton small {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.wellnessCard {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 24px;
+  background:
+    linear-gradient(140deg, rgba(239, 245, 255, 0.96), rgba(244, 239, 255, 0.94)),
+    rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(123, 147, 255, 0.14);
+}
+
+.wellnessIntro h3,
+.noteCard h3 {
+  margin: 0;
+  font-family: "Segoe UI Variable Display", Aptos Display, Aptos, sans-serif;
+  color: #1b2750;
+}
+
+.wellnessIntro p:last-child {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.statTile {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(141, 157, 247, 0.14);
+}
+
+.statTile h4 {
+  margin: 0 0 6px;
+  color: #24304f;
+}
+
+.statTile p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.statValue {
+  margin: 0 0 8px;
+  color: var(--accent-strong);
+  font-family: "Segoe UI Variable Display", Aptos Display, Aptos, sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.resetButton {
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--lavender) 100%);
+  color: white;
+  font-weight: 600;
+  padding: 13px 18px;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(91, 108, 255, 0.22);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.noteCard {
+  background: rgba(246, 248, 255, 0.9);
+  border-radius: 24px;
+  padding: 20px;
+  border: 1px solid rgba(122, 144, 230, 0.14);
+}
+
+.noteCard h3 {
+  margin-top: 0;
+}
+
+.noteCard p,
+.noteCard ul {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.noteCard ul {
+  margin-top: 12px;
+  padding-left: 18px;
+}
+
+.chartContainer {
+  min-height: 520px;
+  width: 100%;
+  border-radius: 24px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(241, 245, 255, 0.76));
+  border: 1px solid rgba(129, 145, 230, 0.12);
+}
+
+button:hover,
+select:hover {
+  transform: translateY(-1px);
+}
+
+button:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: rgba(91, 108, 255, 0.52);
+  box-shadow: 0 0 0 4px rgba(91, 108, 255, 0.14);
+}
+
+.presetButton:hover,
+.segmentControl button:hover,
+.resetButton:hover {
+  box-shadow: 0 18px 30px rgba(91, 108, 255, 0.18);
+}
+
+@media (max-width: 980px) {
+  .appShell {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .sidebar {
+    order: 2;
+  }
+
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .inlineControlGrid,
+  .presetGrid,
+  .checkboxRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .appShell {
+    padding: 14px;
+  }
+
+  .content,
+  .sidebar {
+    padding: 18px;
+  }
+
+  .segmentControl {
+    flex-direction: column;
+  }
+
+  .controlSurfaceHeader {
+    flex-direction: column;
+  }
+
+  .chartContainer {
+    min-height: 420px;
+    padding: 10px;
+  }
+}
