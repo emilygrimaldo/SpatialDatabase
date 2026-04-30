@@ -9,7 +9,13 @@ interface ScatterChartViewProps {
   yType: FieldType;
 }
 
-export default function ScatterChartView({ data, xField, yField, xType, yType }: ScatterChartViewProps) {
+export default function ScatterChartView({
+  data,
+  xField,
+  yField,
+  xType,
+  yType,
+}: ScatterChartViewProps) {
   const xValues = data.map((row) => row[xField]);
   const yValues = data.map((row) => row[yField]);
   const customData = data.map((row) => [row.Patient_ID, row[xField], row[yField]]);
@@ -23,10 +29,10 @@ export default function ScatterChartView({ data, xField, yField, xType, yType }:
           mode: 'markers',
           type: 'scatter',
           marker: {
-            color: '#2563eb',
-            opacity: 0.8,
-            size: 11,
-            line: { width: 1, color: '#ffffff' },
+            color: '#5b6cff',
+            opacity: 0.82,
+            size: 12,
+            line: { width: 1.2, color: '#eef2ff' },
           },
           customdata: customData,
           hovertemplate:
@@ -37,17 +43,25 @@ export default function ScatterChartView({ data, xField, yField, xType, yType }:
       layout={{
         autosize: true,
         margin: { l: 60, r: 30, t: 40, b: 60 },
+        font: {
+          family: 'Aptos, "Segoe UI", sans-serif',
+          color: '#334155',
+        },
         xaxis: {
           title: xField.replace(/_/g, ' '),
           type: xType === 'numeric' ? 'linear' : 'category',
           tickangle: xType === 'numeric' ? 0 : -45,
+          gridcolor: '#dbe4ff',
+          zerolinecolor: '#c7d2fe',
         },
         yaxis: {
           title: yField.replace(/_/g, ' '),
           type: yType === 'numeric' ? 'linear' : 'category',
+          gridcolor: '#dbe4ff',
+          zerolinecolor: '#c7d2fe',
         },
-        plot_bgcolor: '#f8fafc',
-        paper_bgcolor: '#ffffff',
+        plot_bgcolor: 'rgba(241, 245, 255, 0.86)',
+        paper_bgcolor: 'rgba(0, 0, 0, 0)',
         hovermode: 'closest',
       }}
       useResizeHandler
