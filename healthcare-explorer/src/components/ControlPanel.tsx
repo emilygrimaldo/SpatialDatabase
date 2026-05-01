@@ -14,6 +14,9 @@ interface ChartControlsProps {
   yField: HealthField;
   smokingOnly: boolean;
   alcoholIntakeOnly: boolean;
+  showClusters: boolean;
+  clusterCount: number;
+  canCluster: boolean;
   chartTypes: readonly ChartType[];
   xOptions: HealthField[];
   yOptions: HealthField[];
@@ -23,6 +26,8 @@ interface ChartControlsProps {
   onYFieldChange: (value: HealthField) => void;
   onSmokingOnlyChange: (value: boolean) => void;
   onAlcoholIntakeOnlyChange: (value: boolean) => void;
+  onShowClustersChange: (value: boolean) => void;
+  onClusterCountChange: (value: number) => void;
   onReset: () => void;
 }
 
@@ -42,6 +47,9 @@ export function ChartControls({
   yField,
   smokingOnly,
   alcoholIntakeOnly,
+  showClusters,
+  clusterCount,
+  canCluster,
   chartTypes,
   xOptions,
   yOptions,
@@ -51,6 +59,8 @@ export function ChartControls({
   onYFieldChange,
   onSmokingOnlyChange,
   onAlcoholIntakeOnlyChange,
+  onShowClustersChange,
+  onClusterCountChange,
   onReset,
 }: ChartControlsProps) {
   return (
@@ -150,6 +160,44 @@ export function ChartControls({
               <span>Alcohol intake</span>
               <small>Only show records marked with alcohol intake.</small>
             </div>
+          </label>
+        </div>
+      </div>
+
+      <div className="filterSection">
+        <div>
+          <p className="controlLabel">Clustering</p>
+          <p className="controlPrompt">Available when both scatterplot axes are numeric.</p>
+        </div>
+
+        <div className="checkboxRow">
+          <label className="checkboxCard">
+            <input
+              type="checkbox"
+              checked={showClusters}
+              disabled={!canCluster}
+              onChange={(event) => onShowClustersChange(event.target.checked)}
+            />
+            <div>
+              <span>Show clusters</span>
+              <small>Color similar records by their selected X and Y values.</small>
+            </div>
+          </label>
+
+          <label>
+            <p className="controlLabel">Cluster count</p>
+            <select
+              className="selectField"
+              value={clusterCount}
+              disabled={!canCluster || !showClusters}
+              onChange={(event) => onClusterCountChange(Number(event.target.value))}
+            >
+              {[2, 3, 4, 5].map((count) => (
+                <option key={count} value={count}>
+                  {count}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
       </div>
