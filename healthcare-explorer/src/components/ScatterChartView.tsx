@@ -7,6 +7,8 @@ interface ScatterChartViewProps {
   yField: HealthField;
   xType: FieldType;
   yType: FieldType;
+  xLabel: string;
+  yLabel: string;
 }
 
 export default function ScatterChartView({
@@ -15,6 +17,8 @@ export default function ScatterChartView({
   yField,
   xType,
   yType,
+  xLabel,
+  yLabel,
 }: ScatterChartViewProps) {
   const xValues = data.map((row) => row[xField]);
   const yValues = data.map((row) => row[yField]);
@@ -37,7 +41,7 @@ export default function ScatterChartView({
           customdata: customData,
           hovertemplate:
             '<b>Patient %{customdata[0]}</b><br>' +
-            `${xField}: %{x}<br>${yField}: %{y}<extra></extra>`,
+            `${xLabel}: %{x}<br>${yLabel}: %{y}<extra></extra>`,
         },
       ]}
       layout={{
@@ -48,14 +52,20 @@ export default function ScatterChartView({
           color: '#334155',
         },
         xaxis: {
-          title: xField.replace(/_/g, ' '),
+          title: {
+            text: xLabel,
+            standoff: 12,
+          },
           type: xType === 'numeric' ? 'linear' : 'category',
           tickangle: xType === 'numeric' ? 0 : -45,
           gridcolor: '#dbe4ff',
           zerolinecolor: '#c7d2fe',
         },
         yaxis: {
-          title: yField.replace(/_/g, ' '),
+          title: {
+            text: yLabel,
+            standoff: 12,
+          },
           type: yType === 'numeric' ? 'linear' : 'category',
           gridcolor: '#dbe4ff',
           zerolinecolor: '#c7d2fe',
