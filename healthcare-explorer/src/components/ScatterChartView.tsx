@@ -7,7 +7,10 @@ interface ScatterChartViewProps {
   yField: HealthField;
   xType: FieldType;
   yType: FieldType;
+  showClusters: boolean;
 }
+
+const clusterColors = ['#5b6cff', '#f97316', '#14b8a6', '#db2777', '#84cc16'];
 
 export default function ScatterChartView({
   data,
@@ -15,31 +18,68 @@ export default function ScatterChartView({
   yField,
   xType,
   yType,
+  showClusters,
 }: ScatterChartViewProps) {
   const xValues = data.map((row) => row[xField]);
   const yValues = data.map((row) => row[yField]);
   const customData = data.map((row) => [row.Patient_ID, row[xField], row[yField]]);
+  const existingSingleTrace = {
+    x: xValues,
+    y: yValues,
+    mode: 'markers',
+    type: 'scatter',
+    marker: {
+      color: '#5b6cff',
+      opacity: 0.82,
+      size: 12,
+      line: { width: 1.2, color: '#eef2ff' },
+    },
+    customdata: customData,
+    hovertemplate:
+      '<b>Patient %{customdata[0]}</b><br>' +
+      `${xField}: %{x}<br>${yField}: %{y}<extra></extra>`,
+  };
+  const clusterIds = Array.from(
+    new Set(
+      data
+        .map((row) => row.clusterId)
+        .filter((clusterId): clusterId is number => typeof clusterId === 'number')
+    )
+  ).sort((a, b) => a - b);
+  const traces =
+    showClusters && clusterIds.length > 0
+      ? clusterIds.map((clusterId) => {
+          const rowsForCluster = data.filter((row) => row.clusterId === clusterId);
+
+          return {
+            x: rowsForCluster.map((row) => row[xField]),
+            y: rowsForCluster.map((row) => row[yField]),
+            mode: 'markers',
+            type: 'scatter',
+            name: `Cluster ${clusterId + 1}`,
+            marker: {
+              color: clusterColors[clusterId % clusterColors.length],
+              opacity: 0.84,
+              size: 12,
+              line: { width: 1.2, color: '#eef2ff' },
+            },
+            customdata: rowsForCluster.map((row) => [
+              row.Patient_ID,
+              row[xField],
+              row[yField],
+              clusterId + 1,
+            ]),
+            hovertemplate:
+              '<b>Patient %{customdata[0]}</b><br>' +
+              'Cluster: %{customdata[3]}<br>' +
+              `${xField}: %{x}<br>${yField}: %{y}<extra></extra>`,
+          };
+        })
+      : [existingSingleTrace];
 
   return (
     <Plot
-      data={[
-        {
-          x: xValues,
-          y: yValues,
-          mode: 'markers',
-          type: 'scatter',
-          marker: {
-            color: '#5b6cff',
-            opacity: 0.82,
-            size: 12,
-            line: { width: 1.2, color: '#eef2ff' },
-          },
-          customdata: customData,
-          hovertemplate:
-            '<b>Patient %{customdata[0]}</b><br>' +
-            `${xField}: %{x}<br>${yField}: %{y}<extra></extra>`,
-        },
-      ]}
+      data={traces}
       layout={{
         autosize: true,
         margin: { l: 60, r: 30, t: 40, b: 60 },

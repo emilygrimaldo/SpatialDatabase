@@ -8,6 +8,7 @@ interface ChartViewProps {
   yField: HealthField;
   chartType: ChartType;
   fieldMetadata: Record<HealthField, FieldMeta>;
+  showClusters: boolean;
 }
 
 export default function ChartView({
@@ -16,6 +17,7 @@ export default function ChartView({
   yField,
   chartType,
   fieldMetadata,
+  showClusters,
 }: ChartViewProps) {
   const xType: FieldType = fieldMetadata[xField].type;
   const yType: FieldType = fieldMetadata[yField].type;
@@ -23,7 +25,14 @@ export default function ChartView({
   return (
     <div className="chartContainer">
       {chartType === 'scatterplot' ? (
-        <ScatterChartView data={data} xField={xField} yField={yField} xType={xType} yType={yType} />
+        <ScatterChartView
+          data={data}
+          xField={xField}
+          yField={yField}
+          xType={xType}
+          yType={yType}
+          showClusters={showClusters}
+        />
       ) : (
         <HeatmapView data={data} xField={xField} yField={yField} xType={xType} yType={yType} />
       )}

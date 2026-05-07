@@ -57,4 +57,5 @@ export interface HealthRecord {
   Heart_Disease: number;
   Diabetes: number;
   Stroke: number;
+  clusterId?: number;
 }
