@@ -128,6 +128,7 @@ export default function ScatterChartView({
     <Plot
       data={traces}
       layout={{
+        height: 600,
         autosize: true,
         margin: { l: 70, r: 30, t: 40, b: 120 },
         font: {
@@ -155,7 +156,7 @@ export default function ScatterChartView({
         legend: { orientation: 'h', y: -0.35, x: 0 },
       }}
       useResizeHandler
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '600px' }}
     />
   );
 }

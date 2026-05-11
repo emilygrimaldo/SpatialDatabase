@@ -1,6 +1,6 @@
 import Plot from 'react-plotly.js';
-import { FieldType, HealthField, HealthRecord } from '../types';
 import { buildHeatmapData } from '../utils/chartUtils';
+import { FieldType, HealthField, HealthRecord } from '../types';
 
 interface HeatmapViewProps {
   data: HealthRecord[];
@@ -39,7 +39,7 @@ export default function HeatmapView({
           ],
           reversescale: false,
           colorbar: {
-            title: 'Count',
+            title: { text: 'Count' },
             thickness: 15,
             outlinewidth: 0,
           },
@@ -47,6 +47,7 @@ export default function HeatmapView({
         },
       ]}
       layout={{
+        height: 600,
         autosize: true,
         margin: { l: 90, r: 30, t: 40, b: 100 },
         font: {
@@ -68,7 +69,7 @@ export default function HeatmapView({
         paper_bgcolor: 'rgba(0, 0, 0, 0)',
       }}
       useResizeHandler
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '600px' }}
     />
   );
 }

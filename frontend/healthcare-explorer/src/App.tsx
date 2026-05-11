@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { ChartControls, InsightPresets, InsightPreset } from './components/ControlPanel';
 import ChartView from './components/ChartView';
-import { sampleData } from './data/sampleData';
 import { withKMeansClusters } from './utils/clustering';
+
 import {
   chartTypes,
   fieldMetadata,
@@ -10,6 +10,7 @@ import {
   supportedYOptions,
   ChartType,
   HealthField,
+  HealthRecord,
   ShapeField,
 } from './types';
 
@@ -50,9 +51,17 @@ function App() {
   const [showClusters, setShowClusters] = useState(false);
   const [clusterCount, setClusterCount] = useState(3);
   const [markerShape, setMarkerShape] = useState<ShapeField>('none');
+  const [data, setData] = useState<HealthRecord[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/patients')
+      .then((response) => response.json())
+      .then((patients) => setData(patients))
+      .catch((error) => console.error('Failed to load patients:', error));
+  }, []);
 
   const filteredData = useMemo(() => {
-    return sampleData.filter((row) => {
+    return data.filter((row) => {
       if (smokingOnly && row.Smoking !== 1) {
         return false;
       }
@@ -63,7 +72,7 @@ function App() {
 
       return true;
     });
-  }, [smokingOnly, alcoholIntakeOnly]);
+  }, [data, smokingOnly, alcoholIntakeOnly]);
 
   const canCluster =
     chartType === 'scatterplot' &&
