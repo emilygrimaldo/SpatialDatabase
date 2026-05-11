@@ -1,4 +1,11 @@
-import { HealthField, FieldMeta, ChartType } from '../types';
+import {
+  HealthField,
+  FieldMeta,
+  ChartType,
+  ShapeField,
+  shapeFields,
+  shapeFieldLabels,
+} from '../types';
 
 export interface InsightPreset {
   label: string;
@@ -17,6 +24,8 @@ interface ChartControlsProps {
   showClusters: boolean;
   clusterCount: number;
   canCluster: boolean;
+  markerShape: ShapeField;
+  canMarkerShape: boolean;
   chartTypes: readonly ChartType[];
   xOptions: HealthField[];
   yOptions: HealthField[];
@@ -28,6 +37,7 @@ interface ChartControlsProps {
   onAlcoholIntakeOnlyChange: (value: boolean) => void;
   onShowClustersChange: (value: boolean) => void;
   onClusterCountChange: (value: number) => void;
+  onMarkerShapeChange: (value: ShapeField) => void;
   onReset: () => void;
 }
 
@@ -50,6 +60,8 @@ export function ChartControls({
   showClusters,
   clusterCount,
   canCluster,
+  markerShape,
+  canMarkerShape,
   chartTypes,
   xOptions,
   yOptions,
@@ -61,6 +73,7 @@ export function ChartControls({
   onAlcoholIntakeOnlyChange,
   onShowClustersChange,
   onClusterCountChange,
+  onMarkerShapeChange,
   onReset,
 }: ChartControlsProps) {
   return (
@@ -161,6 +174,40 @@ export function ChartControls({
               <small>Only show records marked with alcohol intake.</small>
             </div>
           </label>
+        </div>
+      </div>
+
+      <div className="filterSection">
+        <div>
+          <p className="controlLabel">Marker shape</p>
+          <p className="controlPrompt">
+            {canMarkerShape
+              ? 'Pick one variable to encode as the dot shape. Color is still controlled by clustering.'
+              : 'Available with the scatterplot view.'}
+          </p>
+        </div>
+
+        <div className="checkboxRow" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+          {shapeFields.map((option) => (
+            <label key={option} className="checkboxCard">
+              <input
+                type="radio"
+                name="markerShape"
+                value={option}
+                checked={markerShape === option}
+                disabled={!canMarkerShape}
+                onChange={() => onMarkerShapeChange(option)}
+              />
+              <div>
+                <span>{shapeFieldLabels[option]}</span>
+                <small>
+                  {option === 'none'
+                    ? 'All dots use the same shape.'
+                    : `Differentiates ${shapeFieldLabels[option].toLowerCase()} status by shape.`}
+                </small>
+              </div>
+            </label>
+          ))}
         </div>
       </div>
 

@@ -10,6 +10,7 @@ import {
   supportedYOptions,
   ChartType,
   HealthField,
+  ShapeField,
 } from './types';
 
 const DEFAULT_CHART_TYPE: ChartType = 'scatterplot';
@@ -48,6 +49,7 @@ function App() {
   const [alcoholIntakeOnly, setAlcoholIntakeOnly] = useState(false);
   const [showClusters, setShowClusters] = useState(false);
   const [clusterCount, setClusterCount] = useState(3);
+  const [markerShape, setMarkerShape] = useState<ShapeField>('none');
 
   const filteredData = useMemo(() => {
     return sampleData.filter((row) => {
@@ -130,6 +132,7 @@ function App() {
     setAlcoholIntakeOnly(false);
     setShowClusters(false);
     setClusterCount(3);
+    setMarkerShape('none');
   };
 
   const applyPreset = (preset: InsightPreset) => {
@@ -202,6 +205,8 @@ function App() {
           showClusters={showClusters}
           clusterCount={clusterCount}
           canCluster={canCluster}
+          markerShape={markerShape}
+          canMarkerShape={chartType === 'scatterplot'}
           onChartTypeChange={setChartType}
           onXFieldChange={setXField}
           onYFieldChange={setYField}
@@ -209,6 +214,7 @@ function App() {
           onAlcoholIntakeOnlyChange={setAlcoholIntakeOnly}
           onShowClustersChange={setShowClusters}
           onClusterCountChange={setClusterCount}
+          onMarkerShapeChange={setMarkerShape}
           onReset={resetDefaults}
           chartTypes={chartTypes}
           xOptions={supportedXOptions}
@@ -223,6 +229,7 @@ function App() {
           chartType={chartType}
           fieldMetadata={fieldMetadata}
           showClusters={showClusters && canCluster}
+          markerShape={markerShape}
         />
 
         <InsightPresets presets={insightPresets} onApplyPreset={applyPreset} />

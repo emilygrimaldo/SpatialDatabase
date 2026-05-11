@@ -41,6 +41,33 @@ export const supportedYOptions: HealthField[] = [
 export const chartTypes = ['scatterplot', 'heatmap'] as const;
 export type ChartType = (typeof chartTypes)[number];
 
+export const shapeFields = [
+  'none',
+  'Smoking',
+  'Alcohol_Intake',
+  'Heart_Disease',
+  'Diabetes',
+  'Stroke',
+] as const;
+export type ShapeField = (typeof shapeFields)[number];
+
+export const shapeFieldLabels: Record<ShapeField, string> = {
+  none: 'None',
+  Smoking: 'Smoking',
+  Alcohol_Intake: 'Alcohol Intake',
+  Heart_Disease: 'Heart Disease',
+  Diabetes: 'Diabetes',
+  Stroke: 'Stroke',
+};
+
+export const shapeFieldBinaryLabels: Record<Exclude<ShapeField, 'none'>, [string, string]> = {
+  Smoking: ['Non-smoker', 'Smoker'],
+  Alcohol_Intake: ['No alcohol', 'Alcohol'],
+  Heart_Disease: ['No heart disease', 'Heart disease'],
+  Diabetes: ['No diabetes', 'Diabetes'],
+  Stroke: ['No stroke', 'Stroke'],
+};
+
 export interface HealthRecord {
   Patient_ID: number;
   Age: number;
