@@ -1,6 +1,6 @@
 import Plot from 'react-plotly.js';
-import { FieldType, HealthField, HealthRecord } from '../types';
 import { buildHeatmapData } from '../utils/chartUtils';
+import { FieldType, HealthField, HealthRecord } from '../types';
 
 interface HeatmapViewProps {
   data: HealthRecord[];
@@ -11,7 +11,7 @@ interface HeatmapViewProps {
 }
 
 export default function HeatmapView({ data, xField, yField, xType, yType }: HeatmapViewProps) {
-  const heatmap = buildHeatmapData(data, xField, yField, xType, yType);
+const heatmap = buildHeatmapData(data, xField, yField, xType, yType);
 
   return (
     <Plot
@@ -29,7 +29,7 @@ export default function HeatmapView({ data, xField, yField, xType, yType }: Heat
           ],
           reversescale: false,
           colorbar: {
-            title: 'Count',
+            title: { text: 'Count' },
             thickness: 15,
             outlinewidth: 0,
           },
@@ -37,6 +37,7 @@ export default function HeatmapView({ data, xField, yField, xType, yType }: Heat
         },
       ]}
       layout={{
+        height: 600,
         autosize: true,
         margin: { l: 90, r: 30, t: 40, b: 100 },
         font: {
@@ -44,19 +45,19 @@ export default function HeatmapView({ data, xField, yField, xType, yType }: Heat
           color: '#334155',
         },
         xaxis: {
-          title: xField.replace(/_/g, ' '),
+          title: { text: xField.replace(/_/g, ' ') },
           tickangle: -45,
           gridcolor: '#dbe4ff',
         },
         yaxis: {
-          title: yField.replace(/_/g, ' '),
+          title: { text: yField.replace(/_/g, ' ') },
           gridcolor: '#dbe4ff',
         },
         plot_bgcolor: 'rgba(241, 245, 255, 0.86)',
         paper_bgcolor: 'rgba(0, 0, 0, 0)',
       }}
       useResizeHandler
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '600px' }}
     />
   );
 }
