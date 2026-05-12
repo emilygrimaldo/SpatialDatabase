@@ -41,6 +41,28 @@ stroke INT
    
 https://www.kaggle.com/datasets/rafi003/healthcare-disease-prediction-dataset
 
+## Running and Debugging the Dashboard
+
+The React app expects the backend at `http://localhost:8000`.
+
+From the `backend` folder, start the API:
+
+```powershell
+python app.py
+```
+
+Then check these URLs in a browser or PowerShell:
+
+```powershell
+Invoke-RestMethod http://localhost:8000/health/db
+Invoke-RestMethod http://localhost:8000/patients
+```
+
+`/health/db` tells you whether PostgreSQL is reachable and how many rows are in the
+`patient` table. If `/health/db` works but `/patients` is empty, the table/query is
+the issue. If `/patients` returns records but the graphs are empty, check the browser
+console and the active chart filters.
+
 ## Team Roles
 1. Database and SQL/ Risk Heatmap
 2. Gender + Behavior Heatmap 

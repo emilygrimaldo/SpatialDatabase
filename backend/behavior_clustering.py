@@ -6,7 +6,7 @@ conn = psycopg2.connect(
     host="localhost",
     database="healthcare",
     user="postgres",
-    password="your own pass",
+    password="ott3r",
     port = 5432
 )
 query = """
