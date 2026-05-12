@@ -69,6 +69,16 @@ PostgreSQL. The first request for a new `cluster_count` creates `cluster_runs` a
 systolic blood pressure, cholesterol, and glucose, then saves the assignments for later
 requests.
 
+The same endpoint can also persist multiple-regression predictions:
+
+```powershell
+Invoke-RestMethod "http://localhost:8000/patients?cluster_count=3&regression_target=Diabetes&regression_predictors=Age,BMI,Cholesterol,Smoking"
+```
+
+Regression requests create `regression_runs` and `patient_regression_predictions` if they
+do not already exist, save each patient's predicted value and residual, and reuse matching
+runs when the same target, predictors, and source data are requested again.
+
 ## Team Roles
 1. Database and SQL/ Risk Heatmap
 2. Gender + Behavior Heatmap 

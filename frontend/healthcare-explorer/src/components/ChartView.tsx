@@ -9,6 +9,8 @@ interface ChartViewProps {
   chartType: ChartType;
   fieldMetadata: Record<HealthField, FieldMeta>;
   showClusters: boolean;
+  showRegression: boolean;
+  regressionTargetLabel: string;
   markerShape: ShapeField;
 }
 
@@ -19,6 +21,8 @@ export default function ChartView({
   chartType,
   fieldMetadata,
   showClusters,
+  showRegression,
+  regressionTargetLabel,
   markerShape,
 }: ChartViewProps) {
   const xType: FieldType = fieldMetadata[xField].type;
@@ -38,6 +42,8 @@ export default function ChartView({
           xLabel={xLabel}
           yLabel={yLabel}
           showClusters={showClusters}
+          showRegression={showRegression}
+          regressionTargetLabel={regressionTargetLabel}
           markerShape={markerShape}
         />
       ) : (
