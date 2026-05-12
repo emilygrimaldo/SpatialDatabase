@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ChartControls, InsightPresets, InsightPreset } from './components/ControlPanel';
 import ChartView from './components/ChartView';
+import { withKMeansClusters } from './utils/clustering';
 
 import {
   chartTypes,
@@ -10,6 +11,7 @@ import {
   ChartType,
   HealthField,
   HealthRecord,
+  ShapeField,
 } from './types';
 
 const DEFAULT_CHART_TYPE: ChartType = 'scatterplot';
@@ -46,6 +48,9 @@ function App() {
   const [yField, setYField] = useState<HealthField>(DEFAULT_Y_AXIS);
   const [smokingOnly, setSmokingOnly] = useState(false);
   const [alcoholIntakeOnly, setAlcoholIntakeOnly] = useState(false);
+  const [showClusters, setShowClusters] = useState(false);
+  const [clusterCount, setClusterCount] = useState(3);
+  const [markerShape, setMarkerShape] = useState<ShapeField>('none');
   const [data, setData] = useState<HealthRecord[]>([]);
 
   useEffect(() => {
@@ -53,7 +58,8 @@ function App() {
       .then((response) => response.json())
       .then((patients) => setData(patients))
       .catch((error) => console.error('Failed to load patients:', error));
-}, []);
+  }, []);
+
   const filteredData = useMemo(() => {
     return data.filter((row) => {
       if (smokingOnly && row.Smoking !== 1) {
@@ -67,6 +73,19 @@ function App() {
       return true;
     });
   }, [data, smokingOnly, alcoholIntakeOnly]);
+
+  const canCluster =
+    chartType === 'scatterplot' &&
+    fieldMetadata[xField].type === 'numeric' &&
+    fieldMetadata[yField].type === 'numeric';
+
+  const chartData = useMemo(() => {
+    if (!showClusters || !canCluster) {
+      return filteredData;
+    }
+
+    return withKMeansClusters(filteredData, xField, yField, clusterCount);
+  }, [filteredData, xField, yField, showClusters, canCluster, clusterCount]);
 
   const note = useMemo(() => {
     if (chartType === 'scatterplot') {
@@ -120,6 +139,9 @@ function App() {
     setYField(DEFAULT_Y_AXIS);
     setSmokingOnly(false);
     setAlcoholIntakeOnly(false);
+    setShowClusters(false);
+    setClusterCount(3);
+    setMarkerShape('none');
   };
 
   const applyPreset = (preset: InsightPreset) => {
@@ -189,11 +211,19 @@ function App() {
           yField={yField}
           smokingOnly={smokingOnly}
           alcoholIntakeOnly={alcoholIntakeOnly}
+          showClusters={showClusters}
+          clusterCount={clusterCount}
+          canCluster={canCluster}
+          markerShape={markerShape}
+          canMarkerShape={chartType === 'scatterplot'}
           onChartTypeChange={setChartType}
           onXFieldChange={setXField}
           onYFieldChange={setYField}
           onSmokingOnlyChange={setSmokingOnly}
           onAlcoholIntakeOnlyChange={setAlcoholIntakeOnly}
+          onShowClustersChange={setShowClusters}
+          onClusterCountChange={setClusterCount}
+          onMarkerShapeChange={setMarkerShape}
           onReset={resetDefaults}
           chartTypes={chartTypes}
           xOptions={supportedXOptions}
@@ -202,12 +232,13 @@ function App() {
         />
 
         <ChartView
-          data={filteredData}
+          data={chartData}
           xField={xField}
           yField={yField}
           chartType={chartType}
           fieldMetadata={fieldMetadata}
-          
+          showClusters={showClusters && canCluster}
+          markerShape={markerShape}
         />
 
         <InsightPresets presets={insightPresets} onApplyPreset={applyPreset} />

@@ -8,10 +8,20 @@ interface HeatmapViewProps {
   yField: HealthField;
   xType: FieldType;
   yType: FieldType;
+  xLabel: string;
+  yLabel: string;
 }
 
-export default function HeatmapView({ data, xField, yField, xType, yType }: HeatmapViewProps) {
-const heatmap = buildHeatmapData(data, xField, yField, xType, yType);
+export default function HeatmapView({
+  data,
+  xField,
+  yField,
+  xType,
+  yType,
+  xLabel,
+  yLabel,
+}: HeatmapViewProps) {
+  const heatmap = buildHeatmapData(data, xField, yField, xType, yType);
 
   return (
     <Plot
@@ -33,7 +43,7 @@ const heatmap = buildHeatmapData(data, xField, yField, xType, yType);
             thickness: 15,
             outlinewidth: 0,
           },
-          hovertemplate: `${xField.replace(/_/g, ' ')}: %{x}<br>${yField.replace(/_/g, ' ')}: %{y}<br>Count: %{z}<extra></extra>`,
+          hovertemplate: `${xLabel}: %{x}<br>${yLabel}: %{y}<br>Count: %{z}<extra></extra>`,
         },
       ]}
       layout={{
@@ -45,13 +55,15 @@ const heatmap = buildHeatmapData(data, xField, yField, xType, yType);
           color: '#334155',
         },
         xaxis: {
-          title: { text: xField.replace(/_/g, ' ') },
+          title: { text: xLabel, standoff: 12 },
           tickangle: -45,
           gridcolor: '#dbe4ff',
+          automargin: true,
         },
         yaxis: {
-          title: { text: yField.replace(/_/g, ' ') },
+          title: { text: yLabel, standoff: 12 },
           gridcolor: '#dbe4ff',
+          automargin: true,
         },
         plot_bgcolor: 'rgba(241, 245, 255, 0.86)',
         paper_bgcolor: 'rgba(0, 0, 0, 0)',

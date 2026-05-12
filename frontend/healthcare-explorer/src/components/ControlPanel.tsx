@@ -1,4 +1,11 @@
-import { HealthField, FieldMeta, ChartType } from '../types';
+import {
+  HealthField,
+  FieldMeta,
+  ChartType,
+  ShapeField,
+  shapeFields,
+  shapeFieldLabels,
+} from '../types';
 
 export interface InsightPreset {
   label: string;
@@ -14,6 +21,11 @@ interface ChartControlsProps {
   yField: HealthField;
   smokingOnly: boolean;
   alcoholIntakeOnly: boolean;
+  showClusters: boolean;
+  clusterCount: number;
+  canCluster: boolean;
+  markerShape: ShapeField;
+  canMarkerShape: boolean;
   chartTypes: readonly ChartType[];
   xOptions: HealthField[];
   yOptions: HealthField[];
@@ -23,6 +35,9 @@ interface ChartControlsProps {
   onYFieldChange: (value: HealthField) => void;
   onSmokingOnlyChange: (value: boolean) => void;
   onAlcoholIntakeOnlyChange: (value: boolean) => void;
+  onShowClustersChange: (value: boolean) => void;
+  onClusterCountChange: (value: number) => void;
+  onMarkerShapeChange: (value: ShapeField) => void;
   onReset: () => void;
 }
 
@@ -42,6 +57,11 @@ export function ChartControls({
   yField,
   smokingOnly,
   alcoholIntakeOnly,
+  showClusters,
+  clusterCount,
+  canCluster,
+  markerShape,
+  canMarkerShape,
   chartTypes,
   xOptions,
   yOptions,
@@ -51,6 +71,9 @@ export function ChartControls({
   onYFieldChange,
   onSmokingOnlyChange,
   onAlcoholIntakeOnlyChange,
+  onShowClustersChange,
+  onClusterCountChange,
+  onMarkerShapeChange,
   onReset,
 }: ChartControlsProps) {
   return (
@@ -150,6 +173,78 @@ export function ChartControls({
               <span>Alcohol intake</span>
               <small>Only show records marked with alcohol intake.</small>
             </div>
+          </label>
+        </div>
+      </div>
+
+      <div className="filterSection">
+        <div>
+          <p className="controlLabel">Marker shape</p>
+          <p className="controlPrompt">
+            {canMarkerShape
+              ? 'Pick one variable to encode as the dot shape. Color is still controlled by clustering.'
+              : 'Available with the scatterplot view.'}
+          </p>
+        </div>
+
+        <div className="checkboxRow" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+          {shapeFields.map((option) => (
+            <label key={option} className="checkboxCard">
+              <input
+                type="radio"
+                name="markerShape"
+                value={option}
+                checked={markerShape === option}
+                disabled={!canMarkerShape}
+                onChange={() => onMarkerShapeChange(option)}
+              />
+              <div>
+                <span>{shapeFieldLabels[option]}</span>
+                <small>
+                  {option === 'none'
+                    ? 'All dots use the same shape.'
+                    : `Differentiates ${shapeFieldLabels[option].toLowerCase()} status by shape.`}
+                </small>
+              </div>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="filterSection">
+        <div>
+          <p className="controlLabel">Clustering</p>
+          <p className="controlPrompt">Available when both scatterplot axes are numeric.</p>
+        </div>
+
+        <div className="checkboxRow">
+          <label className="checkboxCard">
+            <input
+              type="checkbox"
+              checked={showClusters}
+              disabled={!canCluster}
+              onChange={(event) => onShowClustersChange(event.target.checked)}
+            />
+            <div>
+              <span>Show clusters</span>
+              <small>Color similar records by their selected X and Y values.</small>
+            </div>
+          </label>
+
+          <label>
+            <p className="controlLabel">Cluster count</p>
+            <select
+              className="selectField"
+              value={clusterCount}
+              disabled={!canCluster || !showClusters}
+              onChange={(event) => onClusterCountChange(Number(event.target.value))}
+            >
+              {[2, 3, 4, 5].map((count) => (
+                <option key={count} value={count}>
+                  {count}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
       </div>
