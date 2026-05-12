@@ -1,1 +1,5 @@
 backend/node_modules/
+frontend/healthcare-explorer/node_modules/
+healthcare-explorer/node_modules/
+__pycache__/
+*.pyc

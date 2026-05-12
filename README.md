@@ -55,13 +55,19 @@ Then check these URLs in a browser or PowerShell:
 
 ```powershell
 Invoke-RestMethod http://localhost:8000/health/db
-Invoke-RestMethod http://localhost:8000/patients
+Invoke-RestMethod "http://localhost:8000/patients?cluster_count=3"
 ```
 
 `/health/db` tells you whether PostgreSQL is reachable and how many rows are in the
 `patient` table. If `/health/db` works but `/patients` is empty, the table/query is
 the issue. If `/patients` returns records but the graphs are empty, check the browser
 console and the active chart filters.
+
+The `/patients` endpoint lazily creates and reuses saved K-means cluster assignments in
+PostgreSQL. The first request for a new `cluster_count` creates `cluster_runs` and
+`patient_clusters` with `CREATE TABLE IF NOT EXISTS`, computes clusters from age, BMI,
+systolic blood pressure, cholesterol, and glucose, then saves the assignments for later
+requests.
 
 ## Team Roles
 1. Database and SQL/ Risk Heatmap

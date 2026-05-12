@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ChartControls, InsightPresets, InsightPreset } from './components/ControlPanel';
 import ChartView from './components/ChartView';
-import { withKMeansClusters } from './utils/clustering';
 
 import {
   chartTypes,
@@ -57,11 +56,15 @@ function App() {
   const [data, setData] = useState<HealthRecord[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadError, setLoadError] = useState('');
+  const [loadedClusterCount, setLoadedClusterCount] = useState(clusterCount);
 
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`${API_BASE_URL}/patients`)
+    setLoadState('loading');
+    setLoadError('');
+
+    fetch(`${API_BASE_URL}/patients?cluster_count=${clusterCount}`)
       .then(async (response) => {
         if (!response.ok) {
           const body = await response.text();
@@ -80,6 +83,7 @@ function App() {
         }
 
         setData(patients);
+        setLoadedClusterCount(clusterCount);
         setLoadState('loaded');
         setLoadError('');
       })
@@ -97,7 +101,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [clusterCount]);
 
   const filteredData = useMemo(() => {
     return data.filter((row) => {
@@ -114,14 +118,11 @@ function App() {
   }, [data, smokingOnly, alcoholIntakeOnly]);
 
   const canCluster = chartType === 'scatterplot';
+  const clusterDataReady = loadedClusterCount === clusterCount;
+  const clusterIdsAvailable =
+    clusterDataReady && filteredData.some((row) => typeof row.clusterId === 'number');
 
-  const chartData = useMemo(() => {
-    if (!showClusters || !canCluster) {
-      return filteredData;
-    }
-
-    return withKMeansClusters(filteredData, clusterCount);
-  }, [filteredData, showClusters, canCluster, clusterCount]);
+  const chartData = filteredData;
 
   const note = useMemo(() => {
     if (chartType === 'scatterplot') {
@@ -132,7 +133,7 @@ function App() {
 
   const dataStatusMessage = useMemo(() => {
     if (loadState === 'loading') {
-      return `Loading patient records from ${API_BASE_URL}/patients...`;
+      return `Loading patient records and ${clusterCount} saved clusters from ${API_BASE_URL}/patients...`;
     }
 
     if (loadState === 'error') {
@@ -147,8 +148,21 @@ function App() {
       return 'Patient records loaded, but the current filters match 0 rows.';
     }
 
+    if (showClusters && canCluster && !clusterIdsAvailable) {
+      return 'Patient records loaded, but no saved cluster assignments are available for this selection yet.';
+    }
+
     return '';
-  }, [data.length, filteredData.length, loadError, loadState]);
+  }, [
+    canCluster,
+    clusterIdsAvailable,
+    data.length,
+    filteredData.length,
+    loadError,
+    loadState,
+    showClusters,
+    clusterCount,
+  ]);
 
   const wellnessStats = useMemo(() => {
     const totalRecords = filteredData.length;
@@ -299,7 +313,7 @@ function App() {
           yField={yField}
           chartType={chartType}
           fieldMetadata={fieldMetadata}
-          showClusters={showClusters && canCluster}
+          showClusters={showClusters && canCluster && clusterIdsAvailable}
           markerShape={markerShape}
         />
 

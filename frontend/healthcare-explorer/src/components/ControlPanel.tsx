@@ -215,7 +215,7 @@ export function ChartControls({
         <div>
           <p className="controlLabel">Clustering</p>
           <p className="controlPrompt">
-            Available with scatterplots. Clusters use age, BMI, systolic blood pressure,
+            Available with scatterplots. Saved clusters use age, BMI, systolic blood pressure,
             cholesterol, and glucose.
           </p>
         </div>
