@@ -214,7 +214,10 @@ export function ChartControls({
       <div className="filterSection">
         <div>
           <p className="controlLabel">Clustering</p>
-          <p className="controlPrompt">Available when both scatterplot axes are numeric.</p>
+          <p className="controlPrompt">
+            Available with scatterplots. Saved clusters use age, BMI, systolic blood pressure,
+            cholesterol, and glucose.
+          </p>
         </div>
 
         <div className="checkboxRow">
@@ -227,7 +230,7 @@ export function ChartControls({
             />
             <div>
               <span>Show clusters</span>
-              <small>Color similar records by their selected X and Y values.</small>
+              <small>Color similar records by their overall health profile.</small>
             </div>
           </label>
 
