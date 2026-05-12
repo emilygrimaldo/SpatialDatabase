@@ -1,6 +1,14 @@
 import { HealthField, HealthRecord } from '../types';
 
-const iterations = 20;
+const maxIterations = 50;
+
+export const clusterFields: HealthField[] = [
+  'Age',
+  'BMI',
+  'Blood_Pressure_Systolic',
+  'Cholesterol',
+  'Glucose_Level',
+];
 
 function normalize(value: number, min: number, max: number) {
   if (min === max) {
@@ -10,70 +18,167 @@ function normalize(value: number, min: number, max: number) {
   return (value - min) / (max - min);
 }
 
-function distance(a: [number, number], b: [number, number]) {
-  const xDistance = a[0] - b[0];
-  const yDistance = a[1] - b[1];
-  return xDistance * xDistance + yDistance * yDistance;
+function toFiniteNumber(value: unknown) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
 }
 
-export function withKMeansClusters(
-  data: HealthRecord[],
-  xField: HealthField,
-  yField: HealthField,
-  clusterCount: number
-) {
+function squaredDistance(a: number[], b: number[]) {
+  return a.reduce((sum, value, index) => {
+    const difference = value - b[index];
+    return sum + difference * difference;
+  }, 0);
+}
+
+function meanPoint(points: number[][]) {
+  const totals = new Array(points[0].length).fill(0);
+
+  points.forEach((point) => {
+    point.forEach((value, index) => {
+      totals[index] += value;
+    });
+  });
+
+  return totals.map((total) => total / points.length);
+}
+
+function closestCentroid(point: number[], centroids: number[][]) {
+  let closestCluster = 0;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  centroids.forEach((centroid, index) => {
+    const currentDistance = squaredDistance(point, centroid);
+    if (currentDistance < closestDistance) {
+      closestDistance = currentDistance;
+      closestCluster = index;
+    }
+  });
+
+  return closestCluster;
+}
+
+function farthestPointFromCentroids(points: number[][], centroids: number[][]) {
+  let farthestIndex = 0;
+  let farthestDistance = Number.NEGATIVE_INFINITY;
+
+  points.forEach((point, index) => {
+    const nearestDistance = Math.min(
+      ...centroids.map((centroid) => squaredDistance(point, centroid))
+    );
+
+    if (nearestDistance > farthestDistance) {
+      farthestDistance = nearestDistance;
+      farthestIndex = index;
+    }
+  });
+
+  return points[farthestIndex];
+}
+
+function initializeCentroids(points: number[][], clusterCount: number) {
+  const center = meanPoint(points);
+  const firstCentroid = points.reduce((best, point) =>
+    squaredDistance(point, center) < squaredDistance(best, center) ? point : best
+  );
+  const centroids = [firstCentroid];
+
+  while (centroids.length < clusterCount) {
+    centroids.push(farthestPointFromCentroids(points, centroids));
+  }
+
+  return centroids;
+}
+
+export function withKMeansClusters(data: HealthRecord[], clusterCount: number) {
   if (data.length === 0) {
     return data;
   }
 
-  const xValues = data.map((row) => Number(row[xField]));
-  const yValues = data.map((row) => Number(row[yField]));
-  const xMin = Math.min(...xValues);
-  const xMax = Math.max(...xValues);
-  const yMin = Math.min(...yValues);
-  const yMax = Math.max(...yValues);
-  const points = data.map<[number, number]>((row) => [
-    normalize(Number(row[xField]), xMin, xMax),
-    normalize(Number(row[yField]), yMin, yMax),
-  ]);
-  const k = Math.min(Math.max(1, clusterCount), data.length);
-  let centroids = points.slice(0, k);
-  let assignments = points.map(() => 0);
+  const validRows = data
+    .map((row, originalIndex) => {
+      const values = clusterFields.map((field) => toFiniteNumber(row[field]));
+      if (values.some((value) => value === null)) {
+        return null;
+      }
 
-  for (let iteration = 0; iteration < iterations; iteration += 1) {
-    assignments = points.map((point) => {
-      let closestCluster = 0;
-      let closestDistance = Number.POSITIVE_INFINITY;
+      return {
+        row,
+        originalIndex,
+        values: values as number[],
+      };
+    })
+    .filter((entry): entry is { row: HealthRecord; originalIndex: number; values: number[] } =>
+      entry !== null
+    );
 
-      centroids.forEach((centroid, index) => {
-        const currentDistance = distance(point, centroid);
-        if (currentDistance < closestDistance) {
-          closestDistance = currentDistance;
-          closestCluster = index;
-        }
-      });
+  if (validRows.length === 0) {
+    return data.map((row) => ({ ...row, clusterId: undefined }));
+  }
 
-      return closestCluster;
-    });
+  const featureRanges = clusterFields.map((_, fieldIndex) => {
+    const values = validRows.map((entry) => entry.values[fieldIndex]);
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values),
+    };
+  });
+
+  const varyingFeatureIndexes = featureRanges
+    .map((range, index) => (range.min === range.max ? null : index))
+    .filter((index): index is number => index !== null);
+
+  if (varyingFeatureIndexes.length === 0) {
+    return data.map((row, index) => ({
+      ...row,
+      clusterId: validRows.some((entry) => entry.originalIndex === index) ? 0 : undefined,
+    }));
+  }
+
+  const points = validRows.map((entry) =>
+    varyingFeatureIndexes.map((fieldIndex) =>
+      normalize(
+        entry.values[fieldIndex],
+        featureRanges[fieldIndex].min,
+        featureRanges[fieldIndex].max
+      )
+    )
+  );
+  const k = Math.min(Math.max(1, clusterCount), validRows.length);
+  let centroids = initializeCentroids(points, k);
+  let assignments = points.map(() => -1);
+
+  for (let iteration = 0; iteration < maxIterations; iteration += 1) {
+    const nextAssignments = points.map((point) => closestCentroid(point, centroids));
+    const unchanged = nextAssignments.every(
+      (assignment, index) => assignment === assignments[index]
+    );
+    assignments = nextAssignments;
 
     centroids = centroids.map((centroid, clusterId) => {
       const clusterPoints = points.filter((_, index) => assignments[index] === clusterId);
 
       if (clusterPoints.length === 0) {
-        return centroid;
+        return farthestPointFromCentroids(points, centroids);
       }
 
-      const total = clusterPoints.reduce<[number, number]>(
-        (sum, point) => [sum[0] + point[0], sum[1] + point[1]],
-        [0, 0]
-      );
-
-      return [total[0] / clusterPoints.length, total[1] / clusterPoints.length];
+      return meanPoint(clusterPoints);
     });
+
+    if (unchanged) {
+      break;
+    }
   }
 
-  return data.map((row, index) => ({
-    ...row,
-    clusterId: assignments[index],
-  }));
+  const assignmentsByOriginalIndex = new Map<number, number>();
+  validRows.forEach((entry, index) => {
+    assignmentsByOriginalIndex.set(entry.originalIndex, assignments[index]);
+  });
+
+  return data.map((row, index) => {
+    const clusterId = assignmentsByOriginalIndex.get(index);
+    return {
+      ...row,
+      clusterId,
+    };
+  });
 }

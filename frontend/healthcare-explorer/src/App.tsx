@@ -17,6 +17,9 @@ import {
 const DEFAULT_CHART_TYPE: ChartType = 'scatterplot';
 const DEFAULT_X_AXIS: HealthField = 'Gender';
 const DEFAULT_Y_AXIS: HealthField = 'BMI';
+const API_BASE_URL = 'http://localhost:8000';
+
+type LoadState = 'loading' | 'loaded' | 'error';
 
 const insightPresets: InsightPreset[] = [
   {
@@ -52,12 +55,48 @@ function App() {
   const [clusterCount, setClusterCount] = useState(3);
   const [markerShape, setMarkerShape] = useState<ShapeField>('none');
   const [data, setData] = useState<HealthRecord[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:8000/patients')
-      .then((response) => response.json())
-      .then((patients) => setData(patients))
-      .catch((error) => console.error('Failed to load patients:', error));
+    let cancelled = false;
+
+    fetch(`${API_BASE_URL}/patients`)
+      .then(async (response) => {
+        if (!response.ok) {
+          const body = await response.text();
+          throw new Error(`GET /patients failed with ${response.status}: ${body}`);
+        }
+
+        return response.json();
+      })
+      .then((patients) => {
+        if (cancelled) {
+          return;
+        }
+
+        if (!Array.isArray(patients)) {
+          throw new Error('GET /patients did not return a list of patient records.');
+        }
+
+        setData(patients);
+        setLoadState('loaded');
+        setLoadError('');
+      })
+      .catch((error: unknown) => {
+        if (cancelled) {
+          return;
+        }
+
+        const message = error instanceof Error ? error.message : String(error);
+        setLoadState('error');
+        setLoadError(message);
+        console.error('Failed to load patients:', error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredData = useMemo(() => {
@@ -74,18 +113,15 @@ function App() {
     });
   }, [data, smokingOnly, alcoholIntakeOnly]);
 
-  const canCluster =
-    chartType === 'scatterplot' &&
-    fieldMetadata[xField].type === 'numeric' &&
-    fieldMetadata[yField].type === 'numeric';
+  const canCluster = chartType === 'scatterplot';
 
   const chartData = useMemo(() => {
     if (!showClusters || !canCluster) {
       return filteredData;
     }
 
-    return withKMeansClusters(filteredData, xField, yField, clusterCount);
-  }, [filteredData, xField, yField, showClusters, canCluster, clusterCount]);
+    return withKMeansClusters(filteredData, clusterCount);
+  }, [filteredData, showClusters, canCluster, clusterCount]);
 
   const note = useMemo(() => {
     if (chartType === 'scatterplot') {
@@ -93,6 +129,26 @@ function App() {
     }
     return 'Heatmaps make it easier to read clusters, category differences, and dense pockets of similar health readings.';
   }, [chartType]);
+
+  const dataStatusMessage = useMemo(() => {
+    if (loadState === 'loading') {
+      return `Loading patient records from ${API_BASE_URL}/patients...`;
+    }
+
+    if (loadState === 'error') {
+      return `Could not load patient records. ${loadError} Check ${API_BASE_URL}/health/db to test the database connection.`;
+    }
+
+    if (data.length === 0) {
+      return `Connected to ${API_BASE_URL}/patients, but it returned 0 records. Check whether the patient table has rows.`;
+    }
+
+    if (filteredData.length === 0) {
+      return 'Patient records loaded, but the current filters match 0 rows.';
+    }
+
+    return '';
+  }, [data.length, filteredData.length, loadError, loadState]);
 
   const wellnessStats = useMemo(() => {
     const totalRecords = filteredData.length;
@@ -230,6 +286,12 @@ function App() {
           yOptions={supportedYOptions}
           fieldMetadata={fieldMetadata}
         />
+
+        {dataStatusMessage !== '' && (
+          <div className={`dataStatus ${loadState === 'error' ? 'dataStatusError' : ''}`}>
+            {dataStatusMessage}
+          </div>
+        )}
 
         <ChartView
           data={chartData}

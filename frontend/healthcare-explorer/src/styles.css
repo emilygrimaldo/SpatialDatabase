@@ -391,6 +391,21 @@ select {
   border: 1px solid rgba(129, 145, 230, 0.12);
 }
 
+.dataStatus {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(239, 246, 255, 0.94);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  color: #1e3a8a;
+  line-height: 1.5;
+}
+
+.dataStatusError {
+  background: rgba(255, 241, 242, 0.95);
+  border-color: rgba(225, 29, 72, 0.24);
+  color: #9f1239;
+}
+
 button:hover,
 select:hover {
   transform: translateY(-1px);
