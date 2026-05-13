@@ -13,6 +13,21 @@ export type HealthField =
   | 'Glucose_Level'
   | 'Blood_Pressure_Systolic';
 
+export type RegressionField =
+  | 'Age'
+  | 'BMI'
+  | 'Blood_Pressure_Systolic'
+  | 'Blood_Pressure_Diastolic'
+  | 'Cholesterol'
+  | 'Glucose_Level'
+  | 'Smoking'
+  | 'Alcohol_Intake'
+  | 'Physical_Activity'
+  | 'Family_History'
+  | 'Heart_Disease'
+  | 'Diabetes'
+  | 'Stroke';
+
 export const fieldMetadata: Record<HealthField, FieldMeta> = {
   Gender: { label: 'Gender', type: 'categorical' },
   Age: { label: 'Age', type: 'numeric' },
@@ -20,6 +35,22 @@ export const fieldMetadata: Record<HealthField, FieldMeta> = {
   Cholesterol: { label: 'Cholesterol', type: 'numeric' },
   Glucose_Level: { label: 'Glucose Level', type: 'numeric' },
   Blood_Pressure_Systolic: { label: 'Systolic Blood Pressure', type: 'numeric' },
+};
+
+export const regressionFieldMetadata: Record<RegressionField, FieldMeta> = {
+  Age: { label: 'Age', type: 'numeric' },
+  BMI: { label: 'BMI', type: 'numeric' },
+  Blood_Pressure_Systolic: { label: 'Systolic Blood Pressure', type: 'numeric' },
+  Blood_Pressure_Diastolic: { label: 'Diastolic Blood Pressure', type: 'numeric' },
+  Cholesterol: { label: 'Cholesterol', type: 'numeric' },
+  Glucose_Level: { label: 'Glucose Level', type: 'numeric' },
+  Smoking: { label: 'Smoking', type: 'binary' },
+  Alcohol_Intake: { label: 'Alcohol Intake', type: 'binary' },
+  Physical_Activity: { label: 'Physical Activity', type: 'binary' },
+  Family_History: { label: 'Family History', type: 'binary' },
+  Heart_Disease: { label: 'Heart Disease', type: 'binary' },
+  Diabetes: { label: 'Diabetes', type: 'binary' },
+  Stroke: { label: 'Stroke', type: 'binary' },
 };
 
 export const supportedXOptions: HealthField[] = [
@@ -36,6 +67,33 @@ export const supportedYOptions: HealthField[] = [
   'Blood_Pressure_Systolic',
   'Cholesterol',
   'Glucose_Level',
+];
+
+export const regressionTargetOptions: RegressionField[] = [
+  'BMI',
+  'Blood_Pressure_Systolic',
+  'Blood_Pressure_Diastolic',
+  'Cholesterol',
+  'Glucose_Level',
+  'Heart_Disease',
+  'Diabetes',
+  'Stroke',
+];
+
+export const regressionPredictorOptions: RegressionField[] = [
+  'Age',
+  'BMI',
+  'Blood_Pressure_Systolic',
+  'Blood_Pressure_Diastolic',
+  'Cholesterol',
+  'Glucose_Level',
+  'Smoking',
+  'Alcohol_Intake',
+  'Physical_Activity',
+  'Family_History',
+  'Heart_Disease',
+  'Diabetes',
+  'Stroke',
 ];
 
 export const chartTypes = ['scatterplot', 'heatmap'] as const;
@@ -84,6 +142,9 @@ export interface HealthRecord {
   Heart_Disease: number;
   Diabetes: number;
   Stroke: number;
-  clusterId?: number;
-  clusterDistance?: number;
+  clusterId?: number | null;
+  clusterDistance?: number | null;
+  regressionPredictedValue?: number | null;
+  regressionActualValue?: number | null;
+  regressionResidual?: number | null;
 }

@@ -2,6 +2,7 @@ import {
   HealthField,
   FieldMeta,
   ChartType,
+  RegressionField,
   ShapeField,
   shapeFields,
   shapeFieldLabels,
@@ -24,12 +25,19 @@ interface ChartControlsProps {
   showClusters: boolean;
   clusterCount: number;
   canCluster: boolean;
+  showRegression: boolean;
+  regressionTarget: RegressionField;
+  regressionPredictors: RegressionField[];
+  canRegression: boolean;
   markerShape: ShapeField;
   canMarkerShape: boolean;
   chartTypes: readonly ChartType[];
   xOptions: HealthField[];
   yOptions: HealthField[];
   fieldMetadata: Record<HealthField, FieldMeta>;
+  regressionTargetOptions: RegressionField[];
+  regressionPredictorOptions: RegressionField[];
+  regressionFieldMetadata: Record<RegressionField, FieldMeta>;
   onChartTypeChange: (value: ChartType) => void;
   onXFieldChange: (value: HealthField) => void;
   onYFieldChange: (value: HealthField) => void;
@@ -37,6 +45,9 @@ interface ChartControlsProps {
   onAlcoholIntakeOnlyChange: (value: boolean) => void;
   onShowClustersChange: (value: boolean) => void;
   onClusterCountChange: (value: number) => void;
+  onShowRegressionChange: (value: boolean) => void;
+  onRegressionTargetChange: (value: RegressionField) => void;
+  onRegressionPredictorToggle: (value: RegressionField) => void;
   onMarkerShapeChange: (value: ShapeField) => void;
   onReset: () => void;
 }
@@ -60,12 +71,19 @@ export function ChartControls({
   showClusters,
   clusterCount,
   canCluster,
+  showRegression,
+  regressionTarget,
+  regressionPredictors,
+  canRegression,
   markerShape,
   canMarkerShape,
   chartTypes,
   xOptions,
   yOptions,
   fieldMetadata,
+  regressionTargetOptions,
+  regressionPredictorOptions,
+  regressionFieldMetadata,
   onChartTypeChange,
   onXFieldChange,
   onYFieldChange,
@@ -73,9 +91,14 @@ export function ChartControls({
   onAlcoholIntakeOnlyChange,
   onShowClustersChange,
   onClusterCountChange,
+  onShowRegressionChange,
+  onRegressionTargetChange,
+  onRegressionPredictorToggle,
   onMarkerShapeChange,
   onReset,
 }: ChartControlsProps) {
+  const regressionDisabled = !canRegression || !showRegression;
+
   return (
     <section className="panelSection controlSurface">
       <div className="controlSurfaceHeader">
@@ -249,6 +272,68 @@ export function ChartControls({
               ))}
             </select>
           </label>
+        </div>
+      </div>
+
+      <div className="filterSection">
+        <div>
+          <p className="controlLabel">Multiple regression</p>
+        </div>
+
+        <div className="regressionCompactRow">
+          <label className="compactToggle">
+            <input
+              type="checkbox"
+              checked={showRegression}
+              disabled={!canRegression}
+              onChange={(event) => onShowRegressionChange(event.target.checked)}
+            />
+            <span>Residuals</span>
+          </label>
+
+          <label className="compactField">
+            <p className="controlLabel">Predict</p>
+            <select
+              className="selectField"
+              value={regressionTarget}
+              disabled={regressionDisabled}
+              onChange={(event) =>
+                onRegressionTargetChange(event.target.value as RegressionField)
+              }
+            >
+              {regressionTargetOptions.map((option) => (
+                <option key={option} value={option}>
+                  {regressionFieldMetadata[option].label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <details className={`predictorDropdown ${regressionDisabled ? 'disabled' : ''}`}>
+            <summary
+              onClick={(event) => {
+                if (regressionDisabled) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              Predictors ({regressionPredictors.length})
+            </summary>
+
+            <div className="predictorMenu">
+              {regressionPredictorOptions.map((option) => (
+                <label key={option} className="predictorOption">
+                  <input
+                    type="checkbox"
+                    checked={regressionPredictors.includes(option)}
+                    disabled={regressionDisabled || option === regressionTarget}
+                    onChange={() => onRegressionPredictorToggle(option)}
+                  />
+                  <span>{regressionFieldMetadata[option].label}</span>
+                </label>
+              ))}
+            </div>
+          </details>
         </div>
       </div>
     </section>

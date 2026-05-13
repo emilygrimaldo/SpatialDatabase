@@ -16,6 +16,8 @@ interface ScatterChartViewProps {
   xLabel: string;
   yLabel: string;
   showClusters: boolean;
+  showRegression: boolean;
+  regressionTargetLabel: string;
   markerShape: ShapeField;
 }
 
@@ -41,6 +43,8 @@ export default function ScatterChartView({
   xLabel,
   yLabel,
   showClusters,
+  showRegression,
+  regressionTargetLabel,
   markerShape,
 }: ScatterChartViewProps) {
   const clusterIds = Array.from(
@@ -53,6 +57,13 @@ export default function ScatterChartView({
 
   const shapeActive = markerShape !== 'none';
   const clusterActive = showClusters && clusterIds.length > 0;
+  const regressionActive =
+    showRegression &&
+    data.some((row) => typeof row.regressionResidual === 'number');
+  const residualMagnitude = Math.max(
+    1,
+    ...data.map((row) => Math.abs(row.regressionResidual ?? 0))
+  );
 
   let groups: TraceGroup[] = [];
 
@@ -86,7 +97,7 @@ export default function ScatterChartView({
             (row) =>
               row.clusterId === clusterId && Number(row[shapeKey]) === binaryValue
           ),
-          name: `Cluster ${clusterId + 1} — ${labels[binaryValue]}`,
+          name: `Cluster ${clusterId + 1} - ${labels[binaryValue]}`,
           color: clusterColors[clusterId % clusterColors.length],
           symbol: shapeSymbols[binaryValue],
           clusterLabel: `Cluster ${clusterId + 1}`,
@@ -101,9 +112,45 @@ export default function ScatterChartView({
     .map((group) => {
       const hoverLines = ['<b>Patient %{customdata[0]}</b>'];
       if (group.clusterLabel) hoverLines.push(`Cluster: ${group.clusterLabel}`);
-      if (group.shapeLabel) hoverLines.push(`${markerShape.replace(/_/g, ' ')}: ${group.shapeLabel}`);
+      if (group.shapeLabel) {
+        hoverLines.push(`${markerShape.replace(/_/g, ' ')}: ${group.shapeLabel}`);
+      }
+      if (showRegression) {
+        hoverLines.push(`Predicted ${regressionTargetLabel}: %{customdata[1]:.2f}`);
+        hoverLines.push(`Actual ${regressionTargetLabel}: %{customdata[2]:.2f}`);
+        hoverLines.push('Residual: %{customdata[3]:+.2f}');
+      }
       hoverLines.push(`${xLabel}: %{x}`);
       hoverLines.push(`${yLabel}: %{y}<extra></extra>`);
+
+      const marker =
+        regressionActive && !clusterActive
+          ? {
+              color: group.rows.map((row) => row.regressionResidual ?? 0),
+              colorscale: [
+                [0, '#2563eb'],
+                [0.5, '#f8fafc'],
+                [1, '#dc2626'],
+              ],
+              cmin: -residualMagnitude,
+              cmax: residualMagnitude,
+              colorbar: {
+                title: { text: 'Residual' },
+                thickness: 14,
+                outlinewidth: 0,
+              },
+              symbol: group.symbol,
+              opacity: 0.86,
+              size: 12,
+              line: { width: 1.2, color: '#eef2ff' },
+            }
+          : {
+              color: group.color,
+              symbol: group.symbol,
+              opacity: 0.84,
+              size: 12,
+              line: { width: 1.2, color: '#eef2ff' },
+            };
 
       return {
         x: group.rows.map((row) => row[xField]),
@@ -112,14 +159,13 @@ export default function ScatterChartView({
         type: 'scatter',
         name: group.name,
         showlegend: group.name !== undefined,
-        marker: {
-          color: group.color,
-          symbol: group.symbol,
-          opacity: 0.84,
-          size: 12,
-          line: { width: 1.2, color: '#eef2ff' },
-        },
-        customdata: group.rows.map((row) => [row.Patient_ID]),
+        marker,
+        customdata: group.rows.map((row) => [
+          row.Patient_ID,
+          row.regressionPredictedValue ?? null,
+          row.regressionActualValue ?? null,
+          row.regressionResidual ?? null,
+        ]),
         hovertemplate: hoverLines.join('<br>'),
       };
     });

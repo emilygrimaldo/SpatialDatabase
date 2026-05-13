@@ -252,6 +252,114 @@ select {
   line-height: 1.5;
 }
 
+.regressionCompactRow {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.6fr) minmax(220px, 1fr) minmax(180px, 0.8fr);
+  gap: 14px;
+  align-items: end;
+}
+
+.compactToggle {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 18px;
+  background: rgba(245, 247, 255, 0.95);
+  border: 1px solid var(--border-soft);
+  color: #1f2a4b;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.compactToggle input,
+.predictorOption input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.compactField {
+  min-width: 0;
+}
+
+.predictorDropdown {
+  position: relative;
+  min-width: 0;
+}
+
+.predictorDropdown summary {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-radius: 18px;
+  background: rgba(245, 247, 255, 0.95);
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.predictorDropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.predictorDropdown summary::after {
+  content: "v";
+  color: var(--accent-strong);
+}
+
+.predictorDropdown[open] summary::after {
+  content: "^";
+}
+
+.predictorDropdown.disabled summary {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.predictorMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  width: min(420px, 72vw);
+  max-height: 280px;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(111, 128, 222, 0.18);
+  box-shadow: 0 18px 40px rgba(76, 92, 162, 0.18);
+}
+
+.predictorOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  color: #1f2a4b;
+  cursor: pointer;
+}
+
+.predictorOption:hover {
+  background: rgba(239, 244, 255, 0.9);
+}
+
+.predictorOption:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .controlGroupHeading {
   padding-top: 4px;
 }

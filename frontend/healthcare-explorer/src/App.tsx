@@ -5,11 +5,15 @@ import ChartView from './components/ChartView';
 import {
   chartTypes,
   fieldMetadata,
+  regressionFieldMetadata,
+  regressionPredictorOptions,
+  regressionTargetOptions,
   supportedXOptions,
   supportedYOptions,
   ChartType,
   HealthField,
   HealthRecord,
+  RegressionField,
   ShapeField,
 } from './types';
 
@@ -17,6 +21,18 @@ const DEFAULT_CHART_TYPE: ChartType = 'scatterplot';
 const DEFAULT_X_AXIS: HealthField = 'Gender';
 const DEFAULT_Y_AXIS: HealthField = 'BMI';
 const API_BASE_URL = 'http://localhost:8000';
+const DEFAULT_REGRESSION_TARGET: RegressionField = 'Diabetes';
+const DEFAULT_REGRESSION_PREDICTORS: RegressionField[] = [
+  'Age',
+  'BMI',
+  'Blood_Pressure_Systolic',
+  'Cholesterol',
+  'Glucose_Level',
+  'Smoking',
+  'Alcohol_Intake',
+  'Physical_Activity',
+  'Family_History',
+];
 
 type LoadState = 'loading' | 'loaded' | 'error';
 
@@ -52,11 +68,29 @@ function App() {
   const [alcoholIntakeOnly, setAlcoholIntakeOnly] = useState(false);
   const [showClusters, setShowClusters] = useState(false);
   const [clusterCount, setClusterCount] = useState(3);
+  const [showRegression, setShowRegression] = useState(false);
+  const [regressionTarget, setRegressionTarget] = useState<RegressionField>(
+    DEFAULT_REGRESSION_TARGET
+  );
+  const [regressionPredictors, setRegressionPredictors] = useState<RegressionField[]>(
+    DEFAULT_REGRESSION_PREDICTORS
+  );
   const [markerShape, setMarkerShape] = useState<ShapeField>('none');
   const [data, setData] = useState<HealthRecord[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadError, setLoadError] = useState('');
   const [loadedClusterCount, setLoadedClusterCount] = useState(clusterCount);
+  const [loadedRegressionKey, setLoadedRegressionKey] = useState('');
+  const canCluster = chartType === 'scatterplot';
+  const canRegression = chartType === 'scatterplot';
+  const activeRegressionPredictors = useMemo(
+    () => regressionPredictors.filter((field) => field !== regressionTarget),
+    [regressionPredictors, regressionTarget]
+  );
+  const regressionRequestKey =
+    showRegression && canRegression && activeRegressionPredictors.length > 0
+      ? `${regressionTarget}|${activeRegressionPredictors.join(',')}`
+      : '';
 
   useEffect(() => {
     let cancelled = false;
@@ -64,7 +98,15 @@ function App() {
     setLoadState('loading');
     setLoadError('');
 
-    fetch(`${API_BASE_URL}/patients?cluster_count=${clusterCount}`)
+    const requestUrl = new URL(`${API_BASE_URL}/patients`);
+    requestUrl.searchParams.set('cluster_count', String(clusterCount));
+
+    if (regressionRequestKey !== '') {
+      requestUrl.searchParams.set('regression_target', regressionTarget);
+      requestUrl.searchParams.set('regression_predictors', activeRegressionPredictors.join(','));
+    }
+
+    fetch(requestUrl.toString())
       .then(async (response) => {
         if (!response.ok) {
           const body = await response.text();
@@ -84,6 +126,7 @@ function App() {
 
         setData(patients);
         setLoadedClusterCount(clusterCount);
+        setLoadedRegressionKey(regressionRequestKey);
         setLoadState('loaded');
         setLoadError('');
       })
@@ -101,7 +144,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [clusterCount]);
+  }, [activeRegressionPredictors, clusterCount, regressionRequestKey, regressionTarget]);
 
   const filteredData = useMemo(() => {
     return data.filter((row) => {
@@ -117,10 +160,14 @@ function App() {
     });
   }, [data, smokingOnly, alcoholIntakeOnly]);
 
-  const canCluster = chartType === 'scatterplot';
   const clusterDataReady = loadedClusterCount === clusterCount;
   const clusterIdsAvailable =
     clusterDataReady && filteredData.some((row) => typeof row.clusterId === 'number');
+  const regressionDataReady = loadedRegressionKey === regressionRequestKey;
+  const regressionValuesAvailable =
+    regressionDataReady &&
+    regressionRequestKey !== '' &&
+    filteredData.some((row) => typeof row.regressionPredictedValue === 'number');
 
   const chartData = filteredData;
 
@@ -133,7 +180,7 @@ function App() {
 
   const dataStatusMessage = useMemo(() => {
     if (loadState === 'loading') {
-      return `Loading patient records and ${clusterCount} saved clusters from ${API_BASE_URL}/patients...`;
+      return `Loading patient records, ${clusterCount} saved clusters, and selected predictions from ${API_BASE_URL}/patients...`;
     }
 
     if (loadState === 'error') {
@@ -152,15 +199,22 @@ function App() {
       return 'Patient records loaded, but no saved cluster assignments are available for this selection yet.';
     }
 
+    if (showRegression && canRegression && !regressionValuesAvailable) {
+      return 'Patient records loaded, but no saved regression predictions are available for this selection yet.';
+    }
+
     return '';
   }, [
     canCluster,
+    canRegression,
     clusterIdsAvailable,
     data.length,
     filteredData.length,
     loadError,
     loadState,
+    regressionValuesAvailable,
     showClusters,
+    showRegression,
     clusterCount,
   ]);
 
@@ -211,6 +265,9 @@ function App() {
     setAlcoholIntakeOnly(false);
     setShowClusters(false);
     setClusterCount(3);
+    setShowRegression(false);
+    setRegressionTarget(DEFAULT_REGRESSION_TARGET);
+    setRegressionPredictors(DEFAULT_REGRESSION_PREDICTORS);
     setMarkerShape('none');
   };
 
@@ -218,6 +275,27 @@ function App() {
     setChartType(preset.chartType);
     setXField(preset.xField);
     setYField(preset.yField);
+  };
+
+  const changeRegressionTarget = (target: RegressionField) => {
+    setRegressionTarget(target);
+    setRegressionPredictors((currentPredictors) =>
+      currentPredictors.filter((field) => field !== target)
+    );
+  };
+
+  const toggleRegressionPredictor = (field: RegressionField) => {
+    if (field === regressionTarget) {
+      return;
+    }
+
+    setRegressionPredictors((currentPredictors) => {
+      if (currentPredictors.includes(field)) {
+        return currentPredictors.filter((currentField) => currentField !== field);
+      }
+
+      return [...currentPredictors, field];
+    });
   };
 
   return (
@@ -284,6 +362,10 @@ function App() {
           showClusters={showClusters}
           clusterCount={clusterCount}
           canCluster={canCluster}
+          showRegression={showRegression}
+          regressionTarget={regressionTarget}
+          regressionPredictors={activeRegressionPredictors}
+          canRegression={canRegression}
           markerShape={markerShape}
           canMarkerShape={chartType === 'scatterplot'}
           onChartTypeChange={setChartType}
@@ -293,12 +375,18 @@ function App() {
           onAlcoholIntakeOnlyChange={setAlcoholIntakeOnly}
           onShowClustersChange={setShowClusters}
           onClusterCountChange={setClusterCount}
+          onShowRegressionChange={setShowRegression}
+          onRegressionTargetChange={changeRegressionTarget}
+          onRegressionPredictorToggle={toggleRegressionPredictor}
           onMarkerShapeChange={setMarkerShape}
           onReset={resetDefaults}
           chartTypes={chartTypes}
           xOptions={supportedXOptions}
           yOptions={supportedYOptions}
           fieldMetadata={fieldMetadata}
+          regressionTargetOptions={regressionTargetOptions}
+          regressionPredictorOptions={regressionPredictorOptions}
+          regressionFieldMetadata={regressionFieldMetadata}
         />
 
         {dataStatusMessage !== '' && (
@@ -314,6 +402,8 @@ function App() {
           chartType={chartType}
           fieldMetadata={fieldMetadata}
           showClusters={showClusters && canCluster && clusterIdsAvailable}
+          showRegression={showRegression && canRegression && regressionValuesAvailable}
+          regressionTargetLabel={regressionFieldMetadata[regressionTarget].label}
           markerShape={markerShape}
         />
 
