@@ -41,6 +41,9 @@ stroke INT
    
 https://www.kaggle.com/datasets/rafi003/healthcare-disease-prediction-dataset
 
+You may need necessary Python modules:
+fastapi uvicorn and vite in particular may be needed in order to run and for database retrieval to work properly.
+
 ## Running and Debugging the Dashboard
 
 The React app expects the backend at `http://localhost:8000`.
